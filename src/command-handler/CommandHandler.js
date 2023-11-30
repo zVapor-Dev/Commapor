@@ -25,6 +25,11 @@ class CommandHandler {
       commandName = commandName.split(".")[0];
 
       const command = new Command(commandName, commandObject);
+
+      for (const validation of validations) {
+        validation(command);
+      }
+
       this.commands.set(command.commandName, command);
     }
   }
