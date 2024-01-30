@@ -28,7 +28,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          registry-url: https:/registery.npmjs.org/
+          registry-url: https://registery.npmjs.org/
       - run: npm ci
       - run: npm publish
         env:
