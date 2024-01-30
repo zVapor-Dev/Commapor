@@ -4,10 +4,8 @@
 name: Commapor
 
 on:
-  push:
-    paths:
-      - '.github/workflows/npm-publish.yml'
-      - 'package.json'
+  release:
+    types: [created]
 
 jobs:
   build:
@@ -30,7 +28,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          registry-url: https://registery.npmjs.org/
+          registry-url: https://registry.npmjs.org
       - run: npm ci
       - run: npm publish
         env:
