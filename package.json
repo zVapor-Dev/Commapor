@@ -2,7 +2,7 @@
   "name": "@zvapor-dev/commapor",
   "version": "0.1.7-alpha",
   "publishConfig": {
-     access: "public"
+     "access": "public"
   },
   "description": "",
   "main": "src/index.js",
