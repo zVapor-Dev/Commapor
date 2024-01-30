@@ -1,5 +1,5 @@
 {
-  "name": "@zvapor-dev/commapor",
+  "name": "commapor",
   "version": "0.1.9-alpha",
   "description": "",
   "main": "src/index.js",
