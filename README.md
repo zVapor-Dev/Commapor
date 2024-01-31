@@ -65,7 +65,7 @@ For any questions or concerns, please contact the project maintainer:
 - Email: contact@zvapor.xyz
 
 ## Status 📊
-[![Publish to NPM](https://github.com/zVapor-Dev/Commapor/actions/workflows/npm-publish.yml/badge.svg?event=release)](https://github.com/zVapor-Dev/Commapor/actions/workflows/npm-publish.yml)
+[![Publish to NPM](https://github.com/zVapor-Dev/Commapor/actions/workflows/npm-publish.yml/badge.svg?event=release)](https://github.com/zVapor-Dev/Commapor/actions/workflows/npm-publish.yml) [![npm version](https://badge.fury.io/js/@zvapor-dev%2Fcommapor.svg)](https://badge.fury.io/js/@zvapor-dev%2Fcommapor)
 
 ## Acknowledgments 👏
 
