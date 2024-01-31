@@ -67,7 +67,3 @@ For any questions or concerns, please contact the project maintainer:
 ## Acknowledgments 👏
 
 Commapor relies on the efforts of open-source contributors. Thanks to everyone who has contributed to making this project better.
-
----
-
-**Note**: Replace [Your Name] and [your.email@example.com] with your information.
