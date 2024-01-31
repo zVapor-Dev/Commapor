@@ -1,3 +1,5 @@
+[![Publish to NPM](https://github.com/zVapor-Dev/Commapor/actions/workflows/npm-publish.yml/badge.svg?event=release)](https://github.com/zVapor-Dev/Commapor/actions/workflows/npm-publish.yml)
+
 # Commapor 🤖💼
 
 Commapor is an advanced command handler designed for Discord.js v14. With a plethora of advanced features, it offers seamless integration for handling commands in your Discord bot, including MongoDB connection and other powerful capabilities.
