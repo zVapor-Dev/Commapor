@@ -40,13 +40,7 @@ class CommandHandler {
 
       const command = new Command(this._instance, commandName, commandObject);
 
-      const {
-        description,
-        options = [],
-        testOnly,
-        type,
-        delete: del,
-      } = commandObject;
+      const { description, testOnly, type, delete: del } = commandObject;
 
       if (del) {
         if (type === "SLASH" || type === "BOTH") {
@@ -71,6 +65,10 @@ class CommandHandler {
       this._commands.set(command.commandName, command);
 
       if (type === "SLASH" || type === "BOTH") {
+        const options =
+          commandObject.options ||
+          this._slashCommands.createOptions(commandObject);
+
         if (testOnly) {
           for (const guildId of this._instance.testServers) {
             this._slashCommands.create(
@@ -114,6 +112,8 @@ class CommandHandler {
       args,
       text: args.join(" "),
       guild: message ? message.guild : interaction.guild,
+      member: message ? message.member : interaction.member,
+      user: message ? message.author : interaction.user
     };
 
     for (const validation of this._validations) {
@@ -169,7 +169,9 @@ class CommandHandler {
       async (interaction) => {
         if (interaction.type !== InteractionType.ApplicationCommand) return;
 
-        const args = ["5", "10"];
+        const args = interaction.options.data.map(({ value }) => {
+          return String(value);
+        });
 
         const response = await this.runCommand(
           interaction.commandName,

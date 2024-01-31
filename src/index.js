@@ -3,10 +3,17 @@ const chalk = require("chalk");
 const CommandHandler = require("./command-handler/CommandHandler");
 
 class Commapor {
-  constructor({ client, mongoUri, commandsDir, testServers = [] }) {
+  constructor({
+    client,
+    mongoUri,
+    commandsDir,
+    testServers = [],
+    botOwners = [],
+  }) {
     if (!client) throw new Error("Client is a required parameter.");
 
     this._testServers = testServers;
+    this._botOwners = botOwners;
 
     if (mongoUri) {
       this.connectToMongo(mongoUri);
@@ -19,6 +26,10 @@ class Commapor {
 
   get testServers() {
     return this._testServers;
+  }
+
+  get botOwners() {
+    return this._botOwners;
   }
 
   connectToMongo(mongoUri) {

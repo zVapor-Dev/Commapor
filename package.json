@@ -1,6 +1,6 @@
 {
   "name": "commapor",
-  "version": "0.1.9-alpha",
+  "version": "0.1.1-alpha",
   "description": "",
   "main": "src/index.js",
   "publishConfig": {
