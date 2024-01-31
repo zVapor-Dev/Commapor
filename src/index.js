@@ -23,6 +23,7 @@ class Commapor {
       new CommandHandler(this, commandsDir, client);
     }
   }
+  
 
   get testServers() {
     return this._testServers;
