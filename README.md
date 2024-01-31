@@ -66,6 +66,7 @@ For any questions or concerns, please contact the project maintainer:
 
 ## Status 📊
 [![Publish to NPM](https://github.com/zVapor-Dev/Commapor/actions/workflows/npm-publish.yml/badge.svg?event=release)](https://github.com/zVapor-Dev/Commapor/actions/workflows/npm-publish.yml) [![npm version](https://badge.fury.io/js/@zvapor-dev%2Fcommapor.svg)](https://badge.fury.io/js/@zvapor-dev%2Fcommapor)
+[![NPM](https://nodei.co/npm/@zvapor-dev/commapor.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/@zvapor-dev/commapor/)
 
 ## Acknowledgments 👏
 
