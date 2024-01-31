@@ -1,6 +1,18 @@
 # Commapor 🤖💼
 
-Commapor is an advanced command handler for discord.js v14, equipped with powerful features like MongoDB connection and more.
+Commapor is an advanced command handler designed for Discord.js v14. With a plethora of advanced features, it offers seamless integration for handling commands in your Discord bot, including MongoDB connection and other powerful capabilities.
+
+## Features 🌟
+
+Discord.js v14 Compatible: Commapor is tailored to work seamlessly with the latest version of Discord.js, ensuring compatibility and optimal performance.
+
+Advanced Command Handling: Easily manage and organize your bot's commands with Commapor's advanced command handling system.
+
+MongoDB Integration: Commapor simplifies the process of connecting to MongoDB, allowing you to effortlessly store and retrieve data for your Discord bot.
+
+Scalability: Whether you're building a small bot or a large-scale application, Commapor scales to meet your needs, providing efficient command handling for any project size.
+
+
 
 ## Installation 🚀
 
