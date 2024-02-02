@@ -1,6 +1,11 @@
-const { ApplicationCommandOptionType } = require("discord.js");
+const chalk = require("chalk");
+const { ApplicationCommandOptionType, Client } = require("discord.js");
 
 class SlashCommands {
+  /**
+   *
+   * @param {Client} client
+   */
   constructor(client) {
     this._client = client;
   }
@@ -53,7 +58,9 @@ class SlashCommands {
         options.length !== existingOptions.length ||
         this.areOptionsDifferent(options, existingOptions)
       ) {
-        console.log(`Updating the command "${name}"`);
+        console.log(
+          chalk`{red [Commapor]} {green Updating slash command} {cyan ${name}}`
+        );
 
         await commands.edit(existingCommand.id, {
           description,

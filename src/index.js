@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const chalk = require("chalk");
 const CommandHandler = require("./command-handler/CommandHandler");
+const Cooldowns = require("./util/Cooldowns");
 
 class Commapor {
   constructor({
@@ -9,11 +10,16 @@ class Commapor {
     commandsDir,
     testServers = [],
     botOwners = [],
+    cooldownConfig = {},
   }) {
     if (!client) throw new Error("Client is a required parameter.");
 
     this._testServers = testServers;
     this._botOwners = botOwners;
+    this._cooldowns = new Cooldowns({
+      instance: this,
+      ...cooldownConfig,
+    });
 
     if (mongoUri) {
       this.connectToMongo(mongoUri);
@@ -23,7 +29,6 @@ class Commapor {
       new CommandHandler(this, commandsDir, client);
     }
   }
-  
 
   get testServers() {
     return this._testServers;
@@ -31,6 +36,10 @@ class Commapor {
 
   get botOwners() {
     return this._botOwners;
+  }
+
+  get cooldowns() {
+    return this._cooldowns;
   }
 
   connectToMongo(mongoUri) {

@@ -12,4 +12,6 @@ module.exports = (command, usage) => {
 
     return false;
   }
+
+  return true;
 };
