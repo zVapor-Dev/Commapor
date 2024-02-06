@@ -1,6 +1,6 @@
 {
   "name": "@zvapor-dev/commapor",
-  "version": "0.1.4-alpha",
+  "version": "1.0",
   "description": "",
   "main": "src/index.js",
   "publishConfig": {

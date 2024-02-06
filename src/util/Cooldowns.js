@@ -1,14 +1,13 @@
-const chalk = require("chalk");
+const cooldownSchema = require('../models/cooldown-schema')
 
 const cooldownDurations = {
   s: 1,
   m: 60,
   h: 60 * 60,
   d: 60 * 60 * 24,
-  w: 60 * 60 * 24 * 7,
-};
+}
 
-const cooldownTypes = ["perUser", "perUserPerGuild", "perGuild", "global"];
+const cooldownTypes = ['perUser', 'perUserPerGuild', 'perGuild', 'global']
 
 class Cooldowns {
   // perUser:
@@ -19,158 +18,215 @@ class Cooldowns {
   // <`${guildId}-${actionId}`: expires>
   // global:
   // <action: expires>
-  _cooldowns = new Map();
+  _cooldowns = new Map()
 
   constructor({
     instance,
-    errorMessage = "Please wait {TIME} before doing that again.",
+    errorMessage = 'Please wait {TIME} before doing that again.',
     botOwnersBypass = false,
     dbRequired = 300, // 5 minutes
   }) {
-    this._instance = instance;
-    this._errorMessage = errorMessage;
-    this._botOwnersBypass = botOwnersBypass;
-    this._dbRequired = dbRequired;
+    this._instance = instance
+    this._errorMessage = errorMessage
+    this._botOwnersBypass = botOwnersBypass
+    this._dbRequired = dbRequired
 
-    // TODO: Load all of the cooldowns from the database
+    this.loadCooldowns()
+  }
+
+  async loadCooldowns() {
+    await cooldownSchema.deleteMany({
+      expires: { $lt: new Date() },
+    })
+
+    const results = await cooldownSchema.find({})
+
+    for (const result of results) {
+      const { _id, expires } = result
+
+      this._cooldowns.set(_id, expires)
+    }
+  }
+
+  getKeyFromCooldownUsage(cooldownUsage) {
+    const { cooldownType, userId, actionId, guildId } = cooldownUsage
+
+    return this.getKey(cooldownType, userId, actionId, guildId)
+  }
+
+  async cancelCooldown(cooldownUsage) {
+    const key = this.getKeyFromCooldownUsage(cooldownUsage)
+
+    this._cooldowns.delete(key)
+
+    await cooldownSchema.deleteOne({ _id: key })
+  }
+
+  async updateCooldown(cooldownUsage, expires) {
+    const key = this.getKeyFromCooldownUsage(cooldownUsage)
+
+    this._cooldowns.set(key, expires)
+
+    const now = new Date()
+    const secondsDiff = (expires.getTime() - now.getTime()) / 1000
+
+    if (secondsDiff > this._dbRequired) {
+      await cooldownSchema.findOneAndUpdate(
+        {
+          _id: key,
+        },
+        {
+          _id: key,
+          expires,
+        },
+        {
+          upsert: true,
+        }
+      )
+    }
   }
 
   verifyCooldown(duration) {
-    if (typeof duration === "number") {
-      return duration;
+    if (typeof duration === 'number') {
+      return duration
     }
 
-    const split = duration.split(" ");
+    const split = duration.split(' ')
 
     if (split.length !== 2) {
       throw new Error(
         `Duration "${duration}" is an invalid duration. Please use "10 m", "15 s" etc.`
-      );
+      )
     }
 
-    const quantity = +split[0];
-    const type = split[1].toLowerCase();
+    const quantity = +split[0]
+    const type = split[1].toLowerCase()
 
     if (!cooldownDurations[type]) {
       throw new Error(
         `Unknown duration type "${type}". Please use one of the following: ${Object.keys(
           cooldownDurations
         )}`
-      );
+      )
     }
 
     if (quantity <= 0) {
       throw new Error(
         `Invalid quantity of "${quantity}". Please use a value greater than 0.`
-      );
+      )
     }
 
-    return quantity * cooldownDurations[type];
+    return quantity * cooldownDurations[type]
   }
 
   getKey(cooldownType, userId, actionId, guildId) {
-    const isPerUser = cooldownType === cooldownTypes[0];
-    const isPerUserPerGuild = cooldownType === cooldownTypes[1];
-    const isPerGuild = cooldownType === cooldownTypes[2];
-    const isGlobal = cooldownType === cooldownTypes[3];
+    const isPerUser = cooldownType === cooldownTypes[0]
+    const isPerUserPerGuild = cooldownType === cooldownTypes[1]
+    const isPerGuild = cooldownType === cooldownTypes[2]
+    const isGlobal = cooldownType === cooldownTypes[3]
 
     if ((isPerUserPerGuild || isPerGuild) && !guildId) {
       throw new Error(
-        chalk`{red [Commapor]} {green Invalid cooldown type "${cooldownType}". Action was used outside of a guild.}`
-      );
+        `Invalid cooldown type "${cooldownType}" used outside of a guild.`
+      )
     }
 
     if (isPerUser) {
-      return `${userId}-${actionId}`;
+      return `${userId}-${actionId}`
     }
 
     if (isPerUserPerGuild) {
-      return `${userId}-${guildId}-${actionId}`;
+      return `${userId}-${guildId}-${actionId}`
     }
 
     if (isPerGuild) {
-      return `${guildId}-${actionId}`;
+      return `${guildId}-${actionId}`
     }
 
     if (isGlobal) {
-      return actionId;
+      return actionId
     }
   }
 
   canBypass(userId) {
-    return this._botOwnersBypass && this._instance.botOwners.includes(userId);
+    return this._botOwnersBypass && this._instance.botOwners.includes(userId)
   }
 
-  start({ cooldownType, userId, actionId, guildId = "", duration }) {
+  async start({ cooldownType, userId, actionId, guildId = '', duration }) {
     if (this.canBypass(userId)) {
-      return;
+      return
     }
 
     if (!cooldownTypes.includes(cooldownType)) {
       throw new Error(
-        chalk`{red [Commapor]} {green Invalid cooldown type "${cooldownType}". Please use one of the following: ${cooldownTypes.join(
-          ", "
-        )}}`
-      );
+        `Invalid cooldown type "${cooldownType}". Please use one of the following: ${cooldownTypes}`
+      )
     }
 
-    const seconds = this.verifyCooldown(duration);
+    const seconds = this.verifyCooldown(duration)
+
+    const key = this.getKey(cooldownType, userId, actionId, guildId)
+
+    const expires = new Date()
+    expires.setSeconds(expires.getSeconds() + seconds)
 
     if (seconds >= this._dbRequired) {
-      // TODO: Save the cooldown to the database
+      await cooldownSchema.findOneAndUpdate(
+        {
+          _id: key,
+        },
+        {
+          _id: key,
+          expires,
+        },
+        {
+          upsert: true,
+        }
+      )
     }
 
-    const key = this.getKey(cooldownType, userId, actionId, guildId);
-
-    const expires = new Date();
-    expires.setSeconds(expires.getSeconds() + seconds);
-
-    this._cooldowns.set(key, expires);
-
-    console.log(this._cooldowns);
+    this._cooldowns.set(key, expires)
   }
 
   canRunAction({
     cooldownType,
     userId,
     actionId,
-    guildId = "",
+    guildId = '',
     errorMessage = this._errorMessage,
   }) {
     if (this.canBypass(userId)) {
-      return true;
+      return true
     }
 
-    const key = this.getKey(cooldownType, userId, actionId, guildId);
-    const expires = this._cooldowns.get(key);
+    const key = this.getKey(cooldownType, userId, actionId, guildId)
+    const expires = this._cooldowns.get(key)
 
     if (!expires) {
-      return true;
+      return true
     }
 
-    const now = new Date();
+    const now = new Date()
     if (now > expires) {
-      this._cooldowns.delete(key);
-      return true;
+      this._cooldowns.delete(key)
+      return true
     }
 
-    const secondsDiff = (expires.getTime() - now.getTime()) / 1000;
-    const w = Math.floor(secondsDiff / (60 * 60 * 24 * 7));
-    const d = Math.floor(secondsDiff / (3600 * 24));
-    const h = Math.floor((secondsDiff % (3600 * 24)) / 3600);
-    const m = Math.floor((secondsDiff % 3600) / 60);
-    const s = Math.floor(secondsDiff % 60);
+    const secondsDiff = (expires.getTime() - now.getTime()) / 1000
+    const d = Math.floor(secondsDiff / (3600 * 24))
+    const h = Math.floor((secondsDiff % (3600 * 24)) / 3600)
+    const m = Math.floor((secondsDiff % 3600) / 60)
+    const s = Math.floor(secondsDiff % 60)
 
-    let time = "";
-    if (w > 0) time += `${w}w `;
-    if (d > 0) time += `${d}d `;
-    if (h > 0) time += `${h}h `;
-    if (m > 0) time += `${m}m `;
-    time += `${s}s`;
+    let time = ''
+    if (d > 0) time += `${d}d `
+    if (h > 0) time += `${h}h `
+    if (m > 0) time += `${m}m `
+    time += `${s}s`
 
-    return errorMessage.replace("{TIME}", time);
+    return errorMessage.replace('{TIME}', time)
   }
 }
 
-module.exports = Cooldowns;
-module.exports.cooldownTypes = cooldownTypes;
+module.exports = Cooldowns
+module.exports.cooldownTypes = cooldownTypes

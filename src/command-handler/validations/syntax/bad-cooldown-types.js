@@ -1,30 +1,28 @@
-const { cooldownTypes } = require("../../../util/Cooldowns");
+const { cooldownTypes } = require('../../../util/Cooldowns')
 
 module.exports = (command) => {
-  const { commandObject, commandName } = command;
+  const { commandObject, commandName } = command
 
   if (!commandObject.cooldowns) {
-    return;
+    return
   }
 
-  let counter = 0;
+  let counter = 0
   for (const type of cooldownTypes) {
     if (commandObject.cooldowns[type]) {
-      ++counter;
+      ++counter
     }
   }
 
   if (counter === 0) {
     throw new Error(
-      `Command "${commandName}" does have a cooldown object, but no cooldown types were specified. Please use one of the following: ${cooldownTypes.join(
-        ", "
-      )}`
-    );
+      `Command "${commandName}" does have a cooldown object, but no cooldown types were specified. Please use one of the following: ${cooldownTypes}`
+    )
   }
 
   if (counter > 1) {
     throw new Error(
       `Command "${commandName}" has multiple cooldown types, you must specify only one.`
-    );
+    )
   }
-};
+}

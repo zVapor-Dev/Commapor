@@ -1,24 +1,27 @@
-const p = require("path");
-const fs = require("fs");
+const fs = require('fs')
 
-const getAllFiles = (path) => {
+const getAllFiles = (path, foldersOnly = false) => {
   const files = fs.readdirSync(path, {
     withFileTypes: true,
-  });
-  let commandFiles = [];
+  })
+  let filesFound = []
 
   for (const file of files) {
-    const fileName = p.join(path, file.name);
+    const fileName = `${path}\\${file.name}`
 
     if (file.isDirectory()) {
-      commandFiles = [...commandFiles, ...getAllFiles(fileName)];
-      continue;
+      if (foldersOnly) {
+        filesFound.push(fileName)
+      } else {
+        filesFound = [...filesFound, ...getAllFiles(fileName)]
+      }
+      continue
     }
 
-    commandFiles.push(fileName);
+    filesFound.push(fileName)
   }
 
-  return commandFiles;
-};
+  return filesFound
+}
 
-module.exports = getAllFiles;
+module.exports = getAllFiles

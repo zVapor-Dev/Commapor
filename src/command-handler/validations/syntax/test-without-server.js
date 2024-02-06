@@ -1,9 +1,11 @@
 module.exports = (command) => {
-  const { instance, commandName, commandObject } = command;
+  const { instance, commandName, commandObject } = command
 
   if (commandObject.testOnly !== true || instance.testServers.length) {
-    return;
+    return
   }
 
-  throw new Error(`Command "${commandName}" is test-only but no test servers were provided.`)
-};
+  throw new Error(
+    `Command "${commandName}" is a test only command, but no test servers were specified.`
+  )
+}
