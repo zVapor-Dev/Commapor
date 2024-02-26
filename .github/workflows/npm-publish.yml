@@ -1,25 +1,18 @@
-name: Publish to NPM
+name: Publish Package to npmjs
 on:
   release:
-    types: [created]
+    types: [published]
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4.1.1
-      - name: Setup Node
-        uses: actions/setup-node@v4.0.1
+      - uses: actions/checkout@v4.1.1
+      # Setup .npmrc file to publish to npm
+      - uses: actions/setup-node@v4.0.1
         with:
-          node-version: '20'
+          node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
-      - name: Install dependencies and build 🔧
-        run: npm ci
-      - name: Login to NPM 🔑
-        run: npm login
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: Publish package on NPM 📦
-        run: npm publish
+      - run: npm ci
+      - run: npm publish --access=public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
