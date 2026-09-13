@@ -1,5 +1,9 @@
 const customCommandSchema = require('../models/custom-command-schema')
 
+const DEFAULT_ALLOWED_MENTIONS = {
+  parse: [],
+}
+
 class CustomCommands {
   // guildId-commandName: response
   _customCommands = new Map()
@@ -54,6 +58,24 @@ class CustomCommands {
     await customCommandSchema.deleteOne({ _id })
   }
 
+  formatResponse(response) {
+    if (typeof response === 'string') {
+      return {
+        content: response,
+        allowedMentions: DEFAULT_ALLOWED_MENTIONS,
+      }
+    }
+
+    return {
+      ...response,
+      allowedMentions: {
+        ...DEFAULT_ALLOWED_MENTIONS,
+        ...response.allowedMentions,
+        parse: response.allowedMentions?.parse ?? [],
+      },
+    }
+  }
+
   async run(commandName, message, interaction) {
     const guild = message ? message.guild : interaction.guild
     if (!guild) {
@@ -66,8 +88,27 @@ class CustomCommands {
       return
     }
 
-    if (message) message.channel.send(response).catch(() => {})
-    else if (interaction) interaction.reply(response).catch(() => {})
+    const usage = {
+      guild,
+      member: message ? message.member : interaction.member,
+      user: message ? message.author : interaction.user,
+      channel: message ? message.channel : interaction.channel,
+      message,
+      interaction,
+    }
+
+    const allowed = await this._commandHandler.runCustomCommandValidations(
+      commandName,
+      usage
+    )
+    if (!allowed) {
+      return
+    }
+
+    const payload = this.formatResponse(response)
+
+    if (message) message.channel.send(payload).catch(() => {})
+    else if (interaction) interaction.reply(payload).catch(() => {})
   }
 }
 

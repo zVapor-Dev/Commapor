@@ -43,6 +43,10 @@ client.login('YOUR_DISCORD_BOT_TOKEN');
 
 - **Bot Owners Configuration**: Define bot owners to have exclusive access to certain commands or functionalities.
 
+## Security 🔒
+
+Commapor loads trusted JavaScript from configured command, event, feature, and validation directories, and reads guild configuration from MongoDB. Both are trust boundaries. See [SECURITY.md](SECURITY.md) for details, including custom-command validation behavior and MongoDB hardening notes.
+
 ## Contributing 🤝
 
 Contributions are always welcome! If you find any bugs or have suggestions for improvements, feel free to open an issue or submit a pull request.

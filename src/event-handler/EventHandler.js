@@ -2,6 +2,9 @@ const { InteractionType } = require('discord.js')
 const path = require('path')
 
 const getAllFiles = require('../util/get-all-files')
+const { safeRequire } = require('../util/safe-path')
+
+const DEFAULT_EVENTS_ROOT = path.join(__dirname, 'events')
 
 class EventHandler {
   // <eventName, array of [function, dynamic validation functions]>
@@ -9,7 +12,8 @@ class EventHandler {
 
   constructor(instance, events, client) {
     this._instance = instance
-    this._eventsDir = events?.dir
+    this._eventsDir = events?.dir ? path.resolve(events.dir) : null
+    this._eventsRoot = this._eventsDir
     this._client = client
 
     delete events.dir
@@ -19,7 +23,8 @@ class EventHandler {
       interactionCreate: {
         isButton: (interaction) => interaction.isButton(),
         isCommand: (interaction) =>
-          interaction.type === InteractionType.ApplicationCommand || interaction.type === InteractionType.ApplicationCommandAutocomplete,
+          interaction.type === InteractionType.ApplicationCommand ||
+          interaction.type === InteractionType.ApplicationCommandAutocomplete,
       },
       messageCreate: {
         isHuman: (message) => !message.author.bot,
@@ -31,18 +36,23 @@ class EventHandler {
   }
 
   async readFiles() {
-    const defaultEvents = getAllFiles(path.join(__dirname, 'events'), true)
-    const folders = this._eventsDir ? getAllFiles(this._eventsDir, true) : []
+    const defaultEvents = getAllFiles(DEFAULT_EVENTS_ROOT, true, DEFAULT_EVENTS_ROOT)
+    const folders = this._eventsDir
+      ? getAllFiles(this._eventsDir, true, this._eventsRoot)
+      : []
 
     for (const folderPath of [...defaultEvents, ...folders]) {
-      const event = folderPath.split(/[\/\\]/g).pop()
-      const files = getAllFiles(folderPath)
+      const event = path.basename(folderPath)
+      const allowedRoot = folderPath.startsWith(DEFAULT_EVENTS_ROOT)
+        ? DEFAULT_EVENTS_ROOT
+        : this._eventsRoot
+      const files = getAllFiles(folderPath, false, allowedRoot)
 
       const functions = this._eventCallbacks.get(event) || []
 
       for (const file of files) {
-        const isBuiltIn = !folderPath.includes(this._eventsDir)
-        const func = require(file)
+        const isBuiltIn = !this._eventsDir || !folderPath.startsWith(this._eventsDir)
+        const func = safeRequire(file, allowedRoot)
         const result = [func]
 
         const split = file.split(event)[1].split(/[\/\\]/g)

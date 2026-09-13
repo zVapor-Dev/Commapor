@@ -1,4 +1,4 @@
-const { ApplicationCommandOptionType } = require('discord.js')
+const { PermissionFlagsBits, ApplicationCommandOptionType } = require('discord.js')
 
 module.exports = {
   description: 'Specifies what commands can be ran inside of what channels',
@@ -6,6 +6,8 @@ module.exports = {
   type: 'SLASH',
   testOnly: true,
   guildOnly: true,
+
+  permissions: [PermissionFlagsBits.Administrator],
 
   options: [
     {
