@@ -3,6 +3,7 @@ const {
   ApplicationCommandOptionType,
 } = require('discord.js')
 const requiredPermissions = require('../../models/required-permissions-schema')
+const { isValidPermission } = require('../../util/discord-allowlists')
 
 const clearAllPermissions = 'Clear All Permissions'
 
@@ -65,6 +66,10 @@ module.exports = {
       await requiredPermissions.deleteOne({ _id })
 
       return `The command "${commandName}" no longer requires any permissions.`
+    }
+
+    if (!isValidPermission(permission)) {
+      return `Invalid permission "${permission}".`
     }
 
     const alreadyExists = await requiredPermissions.findOne({

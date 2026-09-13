@@ -1,4 +1,13 @@
 const requiredRoles = require('../../../models/required-roles-schema')
+const { sanitizeRoleIds } = require('../../../util/discord-allowlists')
+
+const denyMisconfigured = (message, interaction) => {
+  const text =
+    'This command has an invalid role configuration. Contact a server administrator.'
+
+  if (message) message.reply(text)
+  else if (interaction) interaction.reply(text)
+}
 
 module.exports = async (command, usage) => {
   const { guild, member, message, interaction } = usage
@@ -11,24 +20,25 @@ module.exports = async (command, usage) => {
   const document = await requiredRoles.findById(_id)
 
   if (document) {
-    let hasRole = false
+    const { valid } = sanitizeRoleIds(document.roles)
 
-    for (const roleId of document.roles) {
+    if (!valid.length) {
+      denyMisconfigured(message, interaction)
+      return false
+    }
+
+    for (const roleId of valid) {
       if (member.roles.cache.has(roleId)) {
-        hasRole = true
-        break
+        return true
       }
     }
 
-    if (hasRole) {
-      return true
-    }
-
     const reply = {
-      content: `You need one of these roles: ${document.roles.map(
+      content: `You need one of these roles: ${valid.map(
         (roleId) => `<@&${roleId}>`
       )}`,
       allowedMentions: {
+        parse: [],
         roles: [],
       },
     }

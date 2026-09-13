@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const path = require('path')
 
 const CommandHandler = require('./command-handler/CommandHandler')
 const Cooldowns = require('./util/Cooldowns')
@@ -42,11 +43,19 @@ class Main {
     }
 
     if (commandsDir) {
-      this._commandHandler = new CommandHandler(this, commandsDir, client)
+      this._commandHandler = new CommandHandler(
+        this,
+        path.resolve(commandsDir),
+        client
+      )
     }
 
     if (featuresDir) {
-      new FeatureHandler(this, featuresDir, client)
+      new FeatureHandler(this, path.resolve(featuresDir), client)
+    }
+
+    if (events?.dir) {
+      events.dir = path.resolve(events.dir)
     }
 
     this._eventHandler = new EventHandler(this, events, client)

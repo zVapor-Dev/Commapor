@@ -7,14 +7,14 @@
        "access": "public"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node --test test/security.test.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "chalk": "^4.1.2",
-    "discord.js": "^14.14.1",
-    "mongoose": "^8.0.2"
+    "discord.js": "^14.27.0",
+    "mongoose": "^8.24.4"
   }
 }
